@@ -1,9 +1,25 @@
-import { createServer, type Server } from 'node:http';
+import { createServer, type IncomingHttpHeaders, type Server } from 'node:http';
 import { CassetteMissError } from '@stellar-rpc-cassette/core';
 import { readJsonBody, sendJson } from './http.js';
 import { recordInteraction } from './record.js';
 import { createReplaySession } from './replay.js';
 
+const forwardedCredentialHeaders = ['authorization', 'cookie', 'x-api-key'] as const;
+
+function collectForwardHeaders(
+  incoming: IncomingHttpHeaders,
+  configured: Record<string, string> = {},
+): Record<string, string> {
+  const forwarded = { ...configured };
+
+  for (const name of forwardedCredentialHeaders) {
+    const value = incoming[name];
+    if (typeof value === 'string') forwarded[name] = value;
+    else if (Array.isArray(value)) forwarded[name] = value.join(', ');
+  }
+
+  return forwarded;
+}
 export type ProxyMode = 'record' | 'replay';
 
 export interface ProxyOptions {
@@ -38,7 +54,7 @@ export async function startProxy(options: ProxyOptions): Promise<Server> {
               upstream: options.upstream!,
               cassettePath: options.cassettePath,
               request,
-              headers: options.forwardHeaders,
+              headers: collectForwardHeaders(req.headers, options.forwardHeaders),
             })
           : await replay({ cassettePath: options.cassettePath, request });
 

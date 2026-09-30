@@ -14,6 +14,7 @@
 - [x] Serialize concurrent cassette updates without losing interactions
 - [x] Atomic cassette writes
 - [x] Preserve and test RPC error responses deeply
+- [x] Forward credentials upstream without persisting them in cassettes
 
 ## M3 — Offline replay
 

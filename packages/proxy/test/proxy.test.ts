@@ -208,4 +208,46 @@ describe('record and replay proxy', () => {
       error: { code: -32042, message: 'simulation rejected', data: { reason: 'test' } },
     });
   });
+  it('forwards credentials upstream without persisting them in the cassette', async () => {
+    let receivedHeaders: Record<string, string | string[] | undefined> = {};
+    const upstream = createServer((_req, res) => {
+      receivedHeaders = _req.headers;
+      res.setHeader('content-type', 'application/json');
+      res.end(JSON.stringify({ jsonrpc: '2.0', id: 1, result: { sequence: 42 } }));
+    });
+    const upstreamPort = await listen(upstream);
+    const dir = await mkdtemp(join(tmpdir(), 'stellar-cassette-credentials-'));
+    const cassettePath = join(dir, 'credentials.json');
+    const recordServer = await startProxy({
+      mode: 'record',
+      upstream: `http://127.0.0.1:${upstreamPort}`,
+      cassettePath,
+      port: 0,
+    });
+    servers.push(recordServer);
+    const address = recordServer.address();
+    if (!address || typeof address === 'string') throw new Error('Expected TCP address');
+
+    await fetch(`http://127.0.0.1:${address.port}`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        authorization: 'Bearer super-secret-token',
+        cookie: 'session=super-secret-cookie',
+        'x-api-key': 'super-secret-api-key',
+      },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'getLatestLedger' }),
+    });
+
+    expect(receivedHeaders.authorization).toBe('Bearer super-secret-token');
+    expect(receivedHeaders.cookie).toBe('session=super-secret-cookie');
+    expect(receivedHeaders['x-api-key']).toBe('super-secret-api-key');
+
+    const cassetteText = await readFile(cassettePath, 'utf8');
+    expect(cassetteText).not.toContain('super-secret-token');
+    expect(cassetteText).not.toContain('super-secret-cookie');
+    expect(cassetteText).not.toContain('super-secret-api-key');
+    expect(cassetteText.toLowerCase()).not.toContain('authorization');
+    expect(cassetteText.toLowerCase()).not.toContain('x-api-key');
+  });
 });
