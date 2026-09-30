@@ -4,6 +4,7 @@ import {
   canonicalJson,
   createCassette,
   findInteraction,
+  JsonRpcResponseSchema,
   requestsMatch,
   type JsonRpcRequest,
 } from '../src/index.js';
@@ -48,5 +49,28 @@ describe('canonical matching', () => {
 
     expect(findInteraction(cassette, request).sequence).toBe(1);
     expect(findInteraction(cassette, request, new Set([1])).sequence).toBe(2);
+  });
+  it('accepts a structured JSON-RPC error response', () => {
+    expect(
+      JsonRpcResponseSchema.parse({
+        jsonrpc: '2.0',
+        id: 1,
+        error: { code: -32000, message: 'upstream failure', data: { retryable: false } },
+      }),
+    ).toMatchObject({ error: { code: -32000, message: 'upstream failure' } });
+  });
+
+  it('rejects responses without exactly one result or error', () => {
+    expect(() => JsonRpcResponseSchema.parse({ jsonrpc: '2.0', id: 1 })).toThrow(
+      'exactly one of result or error',
+    );
+    expect(() =>
+      JsonRpcResponseSchema.parse({
+        jsonrpc: '2.0',
+        id: 1,
+        result: {},
+        error: { code: -32000, message: 'invalid' },
+      }),
+    ).toThrow('exactly one of result or error');
   });
 });

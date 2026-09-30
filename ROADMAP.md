@@ -13,7 +13,7 @@
 - [x] Persist sequence/order
 - [x] Serialize concurrent cassette updates without losing interactions
 - [x] Atomic cassette writes
-- [ ] Preserve and test RPC error responses deeply
+- [x] Preserve and test RPC error responses deeply
 
 ## M3 — Offline replay
 

@@ -9,12 +9,33 @@ export const JsonRpcRequestSchema = z.object({
   params: z.unknown().optional().default({}),
 });
 
+export const JsonRpcErrorSchema = z
+  .object({
+    code: z.number().int(),
+    message: z.string(),
+    data: z.unknown().optional(),
+  })
+  .passthrough();
+
 export const JsonRpcResponseSchema = z
   .object({
     jsonrpc: z.literal('2.0').optional(),
     id: JsonRpcIdSchema.optional(),
+    result: z.unknown().optional(),
+    error: JsonRpcErrorSchema.optional(),
   })
-  .passthrough();
+  .passthrough()
+  .superRefine((response, context) => {
+    const hasResult = Object.hasOwn(response, 'result');
+    const hasError = Object.hasOwn(response, 'error');
+
+    if (hasResult === hasError) {
+      context.addIssue({
+        code: 'custom',
+        message: 'JSON-RPC response must contain exactly one of result or error.',
+      });
+    }
+  });
 
 export const CassetteInteractionSchema = z.object({
   sequence: z.number().int().positive(),

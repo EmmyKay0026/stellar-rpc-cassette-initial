@@ -151,4 +151,61 @@ describe('record and replay proxy', () => {
     expect(ledger.protocolVersion).toBeGreaterThan(0);
     expect(upstreamContacts).toBe(0);
   });
+  it('records and replays JSON-RPC errors with the incoming request id', async () => {
+    const upstream = createServer((_req, res) => {
+      res.setHeader('content-type', 'application/json');
+      res.end(
+        JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          error: { code: -32042, message: 'simulation rejected', data: { reason: 'test' } },
+        }),
+      );
+    });
+    const upstreamPort = await listen(upstream);
+    const dir = await mkdtemp(join(tmpdir(), 'stellar-cassette-rpc-error-'));
+    const cassettePath = join(dir, 'rpc-error.json');
+    const recordServer = await startProxy({
+      mode: 'record',
+      upstream: `http://127.0.0.1:${upstreamPort}`,
+      cassettePath,
+      port: 0,
+    });
+    servers.push(recordServer);
+    const recordAddress = recordServer.address();
+    if (!recordAddress || typeof recordAddress === 'string')
+      throw new Error('Expected TCP address');
+
+    const request = { jsonrpc: '2.0', id: 1, method: 'simulateTransaction', params: {} };
+    const recorded = await fetch(`http://127.0.0.1:${recordAddress.port}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(request),
+    }).then((response) => response.json());
+    expect(recorded).toMatchObject({
+      id: 1,
+      error: { code: -32042, message: 'simulation rejected', data: { reason: 'test' } },
+    });
+
+    const cassette = JSON.parse(await readFile(cassettePath, 'utf8')) as {
+      interactions: Array<{ response: unknown }>;
+    };
+    expect(cassette.interactions[0]?.response).toEqual(recorded);
+
+    const replayServer = await startProxy({ mode: 'replay', cassettePath, port: 0 });
+    servers.push(replayServer);
+    const replayAddress = replayServer.address();
+    if (!replayAddress || typeof replayAddress === 'string')
+      throw new Error('Expected TCP address');
+
+    const replayed = await fetch(`http://127.0.0.1:${replayAddress.port}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ ...request, id: 77 }),
+    }).then((response) => response.json());
+    expect(replayed).toMatchObject({
+      id: 77,
+      error: { code: -32042, message: 'simulation rejected', data: { reason: 'test' } },
+    });
+  });
 });
