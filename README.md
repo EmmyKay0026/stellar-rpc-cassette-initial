@@ -49,6 +49,7 @@ node packages/cli/dist/index.js record \
   --upstream https://soroban-testnet.stellar.org \
   --cassette ./fixtures/test.json -- npm test
 ```
+
 ## Replay
 
 ```bash
@@ -95,4 +96,3 @@ docs             architecture and format notes
 7. Add Stellar-aware normalization only after exact replay is stable.
 
 See [ROADMAP.md](./ROADMAP.md).
-
