@@ -9,7 +9,7 @@ const program = new Command();
 program
   .name('stellar-cassette')
   .description('Record and replay Stellar JSON-RPC interactions for deterministic offline tests.')
-  .version('0.1.0-alpha.0');
+  .version('0.1.0');
 
 program
   .command('record')

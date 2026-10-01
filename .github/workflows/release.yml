@@ -1,0 +1,30 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  verify-and-pack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+      - run: pnpm format:check
+      - run: mkdir -p release-packages
+      - run: pnpm --filter @stellar-rpc-cassette/core pack --pack-destination ./release-packages
+      - run: pnpm --filter @stellar-rpc-cassette/proxy pack --pack-destination ./release-packages
+      - run: pnpm --filter stellar-rpc-cassette pack --pack-destination ./release-packages
+      - uses: actions/upload-artifact@v4
+        with:
+          name: npm-packages
+          path: release-packages/*.tgz

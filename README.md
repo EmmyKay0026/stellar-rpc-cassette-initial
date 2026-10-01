@@ -25,6 +25,14 @@ pnpm check
 
 CI installs dependencies with `pnpm install --frozen-lockfile` so dependency changes must include an updated lockfile.
 
+## Release
+
+The `v0.1.0` release is validated by the tag workflow, which runs the full check suite and uploads npm tarballs as a workflow artifact. To publish manually after reviewing those artifacts:
+
+```bash
+pnpm publish -r --access public --no-git-checks
+```
+
 ## Install
 
 The CLI and libraries are published as npm packages:

@@ -1,6 +1,6 @@
 {
   "name": "stellar-rpc-cassette-monorepo",
-  "version": "0.1.0-alpha.0",
+  "version": "0.1.0",
   "private": true,
   "description": "Deterministic record-and-replay testing infrastructure for Stellar JSON-RPC applications.",
   "type": "module",
