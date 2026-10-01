@@ -25,6 +25,16 @@ pnpm check
 
 CI installs dependencies with `pnpm install --frozen-lockfile` so dependency changes must include an updated lockfile.
 
+## Install
+
+The CLI and libraries are published as npm packages:
+
+```bash
+pnpm add -D stellar-rpc-cassette
+```
+
+The package includes the `stellar-cassette` executable. The `@stellar-rpc-cassette/core` and `@stellar-rpc-cassette/proxy` packages are also published for programmatic integrations.
+
 ## Record
 
 ```bash

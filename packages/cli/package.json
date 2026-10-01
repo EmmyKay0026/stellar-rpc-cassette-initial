@@ -1,8 +1,20 @@
 {
   "name": "stellar-rpc-cassette",
   "version": "0.1.0-alpha.0",
-  "private": true,
   "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stellar-rpc-cassette/stellar-rpc-cassette.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "bin": {
     "stellar-cassette": "./dist/index.js"
   },

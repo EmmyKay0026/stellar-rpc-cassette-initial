@@ -40,7 +40,7 @@
 - [x] CLI: `record`, `replay`, `inspect`
 - [x] CI, linting, formatting, tests, build
 - [x] `stellar-cassette record -- <test command>` workflow
-- [ ] install/publish packaging
+- [x] install/publish packaging
 - [ ] tagged v0.1 release
 
 ## M6 — Maintainer-ready project
