@@ -42,6 +42,13 @@ http://127.0.0.1:6969
 
 Then make the Stellar RPC request you want to capture.
 
+To run a test command against an automatically managed proxy, pass the command after `--`. The child receives the proxy URL in `STELLAR_RPC_URL`, and its exit code is returned:
+
+```bash
+node packages/cli/dist/index.js record \
+  --upstream https://soroban-testnet.stellar.org \
+  --cassette ./fixtures/test.json -- npm test
+```
 ## Replay
 
 ```bash
@@ -88,3 +95,4 @@ docs             architecture and format notes
 7. Add Stellar-aware normalization only after exact replay is stable.
 
 See [ROADMAP.md](./ROADMAP.md).
+

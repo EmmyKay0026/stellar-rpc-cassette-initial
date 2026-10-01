@@ -39,11 +39,10 @@
 
 - [x] CLI: `record`, `replay`, `inspect`
 - [x] CI, linting, formatting, tests, build
-- [ ] `stellar-cassette record -- <test command>` workflow
+- [x] `stellar-cassette record -- <test command>` workflow
 - [ ] install/publish packaging
 - [ ] tagged v0.1 release
 
 ## M6 — Maintainer-ready project
 
 Create contributor issues only after the core workflow is proven against real Stellar calls. Good follow-on issues include normalizers, pagination, migrations, diffing, adapters, validation, sanitization, compatibility testing, and performance work.
-

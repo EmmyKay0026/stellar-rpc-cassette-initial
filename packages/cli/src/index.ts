@@ -17,7 +17,8 @@ program
   .requiredOption('--cassette <path>', 'Cassette JSON file')
   .option('--host <host>', 'Local host', '127.0.0.1')
   .option('--port <port>', 'Local port', '6969')
-  .action(runRecord);
+  .argument('[command...]', 'Test command to run with STELLAR_RPC_URL injected')
+  .action((command, options) => runRecord({ ...options, command }));
 
 program
   .command('replay')
