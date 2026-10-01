@@ -1,6 +1,6 @@
 # Basic SDK example
 
-This flow is validated with the official `@stellar/stellar-sdk` against the committed testnet fixture at `fixtures/get-latest-ledger/testnet.json`.
+This flow is validated with the official `@stellar/stellar-sdk` against the committed testnet fixtures at `fixtures/get-latest-ledger/testnet.json` and `fixtures/get-ledger-entries/testnet-account.json`.
 
 The target flow is:
 

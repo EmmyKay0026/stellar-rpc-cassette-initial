@@ -29,7 +29,7 @@
 ## M4 — Stellar-aware behavior
 
 - [x] `getLatestLedger` real fixture
-- [ ] `getLedgerEntries` real fixture
+- [x] `getLedgerEntries` real fixture
 - [ ] `simulateTransaction` real fixture
 - [ ] Method-aware normalization framework
 - [ ] XDR inspection/normalization helpers

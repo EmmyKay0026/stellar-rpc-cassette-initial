@@ -1,0 +1,33 @@
+{
+  "format": "stellar-rpc-cassette",
+  "version": 1,
+  "recordedAt": "2026-10-01T06:04:07.216Z",
+  "interactions": [
+    {
+      "sequence": 1,
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "getLedgerEntries",
+        "params": {
+          "keys": ["AAAAAAAAAAAWC+KuQMDn5mNZ0LAmChVqVg+IUu65Zr3B3frj/EWyhQ=="]
+        }
+      },
+      "response": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": {
+          "entries": [
+            {
+              "key": "AAAAAAAAAAAWC+KuQMDn5mNZ0LAmChVqVg+IUu65Zr3B3frj/EWyhQ==",
+              "xdr": "AAAAAAAAAAAWC+KuQMDn5mNZ0LAmChVqVg+IUu65Zr3B3frj/EWyhQAAABdIhip5AAFWFAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAA",
+              "lastModifiedLedgerSeq": 4865320,
+              "extXdr": "AAAAAA=="
+            }
+          ],
+          "latestLedger": 4962212
+        }
+      }
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 import { createServer } from 'node:http';
 import { fileURLToPath } from 'node:url';
-import { rpc } from '@stellar/stellar-sdk';
+import { Keypair, rpc, xdr } from '@stellar/stellar-sdk';
 import { appendInteraction, createCassette, saveCassette } from '@stellar-rpc-cassette/core';
 import { mkdtemp, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -310,5 +310,40 @@ describe('record and replay proxy', () => {
       body: JSON.stringify({ ...secondRequest, id: 22 }),
     }).then((response) => response.json());
     expect(sequentialSecond).toMatchObject({ id: 22, result: { marker: 'second' } });
+  });
+  it('replays a real getLedgerEntries fixture through the Stellar SDK without upstream access', async () => {
+    let upstreamContacts = 0;
+    const forbiddenUpstream = createServer((_req, res) => {
+      upstreamContacts += 1;
+      res.statusCode = 500;
+      res.end('Replay must never contact upstream');
+    });
+    const upstreamPort = await listen(forbiddenUpstream);
+    const cassettePath = fileURLToPath(
+      new URL('../../../fixtures/get-ledger-entries/testnet-account.json', import.meta.url),
+    );
+    const replayServer = await startProxy({
+      mode: 'replay',
+      cassettePath,
+      upstream: `http://127.0.0.1:${upstreamPort}`,
+      port: 0,
+    });
+    servers.push(replayServer);
+    const address = replayServer.address();
+    if (!address || typeof address === 'string') throw new Error('Expected TCP address');
+
+    const key = xdr.LedgerKey.account(
+      new xdr.LedgerKeyAccount({
+        accountId: Keypair.fromPublicKey(
+          'GALAXYVOIDAOPZTDLHILAJQKCVVFMD4IKLXLSZV5YHO7VY74IWZILUTO',
+        ).xdrAccountId(),
+      }),
+    );
+    const client = new rpc.Server(`http://127.0.0.1:${address.port}`, { allowHttp: true });
+    const response = await client.getLedgerEntries(key);
+
+    expect(response.entries).toHaveLength(1);
+    expect(response.latestLedger).toBeGreaterThan(0);
+    expect(upstreamContacts).toBe(0);
   });
 });
