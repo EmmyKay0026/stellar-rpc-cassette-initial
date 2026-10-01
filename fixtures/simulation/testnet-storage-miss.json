@@ -1,0 +1,34 @@
+{
+  "format": "stellar-rpc-cassette",
+  "version": 1,
+  "recordedAt": "2026-10-01T06:15:03.528Z",
+  "interactions": [
+    {
+      "sequence": 1,
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "simulateTransaction",
+        "params": {
+          "transaction": "AAAAAgAAAAAg4dbAxsGAGICfBG3iT2cKGYQ6hK4sJWzZ6or1C5v6GAAAAGQAJsOiAAAAEQAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAGAAAAAAAAAABzAP+dP0PsNzYvFF1pv7a8RQXwH5eg3uZBbbWjE9PwAsAAAAJaW5jcmVtZW50AAAAAAAAAgAAABIAAAAAAAAAACDh1sDGwYAYgJ8EbeJPZwoZhDqEriwlbNnqivULm/oYAAAAAwAAAAMAAAAAAAAAAAAAAAA=",
+          "useUpgradedAuth": true,
+          "resourceConfig": {
+            "instructionLeeway": 3000000
+          }
+        }
+      },
+      "response": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": {
+          "error": "HostError: Error(Storage, MissingValue)\n\nEvent log (newest first):\n   0: [Diagnostic Event] topics:[error, Error(Storage, MissingValue)], data:\"trying to get non-existing value for contract instance\"\n   1: [Diagnostic Event] topics:[fn_call, CDGAH7TU7UH3BXGYXRIXLJX63LYRIF6APZPIG64ZAW3NNDCPJ7AAWVTZ, increment], data:[GAQODVWAY3AYAGEAT4CG3YSPM4FBTBB2QSXCYJLM3HVIV5ILTP5BRXCD, 3]\n",
+          "events": [
+            "AAAAAAAAAAAAAAAAAAAAAgAAAAAAAAADAAAADwAAAAdmbl9jYWxsAAAAAA0AAAAgzAP+dP0PsNzYvFF1pv7a8RQXwH5eg3uZBbbWjE9PwAsAAAAPAAAACWluY3JlbWVudAAAAAAAABAAAAABAAAAAgAAABIAAAAAAAAAACDh1sDGwYAYgJ8EbeJPZwoZhDqEriwlbNnqivULm/oYAAAAAwAAAAM=",
+            "AAAAAAAAAAAAAAAAAAAAAgAAAAAAAAACAAAADwAAAAVlcnJvcgAAAAAAAAIAAAADAAAAAwAAAA4AAAA2dHJ5aW5nIHRvIGdldCBub24tZXhpc3RpbmcgdmFsdWUgZm9yIGNvbnRyYWN0IGluc3RhbmNlAAA="
+          ],
+          "latestLedger": 4962343
+        }
+      }
+    }
+  ]
+}

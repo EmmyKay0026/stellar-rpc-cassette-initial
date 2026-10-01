@@ -30,7 +30,7 @@
 
 - [x] `getLatestLedger` real fixture
 - [x] `getLedgerEntries` real fixture
-- [ ] `simulateTransaction` real fixture
+- [x] `simulateTransaction` real fixture
 - [ ] Method-aware normalization framework
 - [ ] XDR inspection/normalization helpers
 - [ ] `getEvents` pagination replay

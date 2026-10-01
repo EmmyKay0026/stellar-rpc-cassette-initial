@@ -1,6 +1,6 @@
 import { createServer } from 'node:http';
 import { fileURLToPath } from 'node:url';
-import { Keypair, rpc, xdr } from '@stellar/stellar-sdk';
+import { Keypair, Networks, rpc, TransactionBuilder, xdr } from '@stellar/stellar-sdk';
 import { appendInteraction, createCassette, saveCassette } from '@stellar-rpc-cassette/core';
 import { mkdtemp, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -344,6 +344,40 @@ describe('record and replay proxy', () => {
 
     expect(response.entries).toHaveLength(1);
     expect(response.latestLedger).toBeGreaterThan(0);
+    expect(upstreamContacts).toBe(0);
+  });
+  it('replays a real simulateTransaction fixture through the Stellar SDK without upstream access', async () => {
+    let upstreamContacts = 0;
+    const forbiddenUpstream = createServer((_req, res) => {
+      upstreamContacts += 1;
+      res.statusCode = 500;
+      res.end('Replay must never contact upstream');
+    });
+    const upstreamPort = await listen(forbiddenUpstream);
+    const cassettePath = fileURLToPath(
+      new URL('../../../fixtures/simulation/testnet-storage-miss.json', import.meta.url),
+    );
+    const replayServer = await startProxy({
+      mode: 'replay',
+      cassettePath,
+      upstream: `http://127.0.0.1:${upstreamPort}`,
+      port: 0,
+    });
+    servers.push(replayServer);
+    const address = replayServer.address();
+    if (!address || typeof address === 'string') throw new Error('Expected TCP address');
+
+    const transaction = TransactionBuilder.fromXdr(
+      'AAAAAgAAAAAg4dbAxsGAGICfBG3iT2cKGYQ6hK4sJWzZ6or1C5v6GAAAAGQAJsOiAAAAEQAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAGAAAAAAAAAABzAP+dP0PsNzYvFF1pv7a8RQXwH5eg3uZBbbWjE9PwAsAAAAJaW5jcmVtZW50AAAAAAAAAgAAABIAAAAAAAAAACDh1sDGwYAYgJ8EbeJPZwoZhDqEriwlbNnqivULm/oYAAAAAwAAAAMAAAAAAAAAAAAAAAA=',
+      Networks.TESTNET,
+    );
+    const client = new rpc.Server(`http://127.0.0.1:${address.port}`, { allowHttp: true });
+    const result = await client.simulateTransaction(transaction, { cpuInstructions: 3000000 });
+
+    expect(rpc.Api.isSimulationError(result)).toBe(true);
+    if (!rpc.Api.isSimulationError(result)) throw new Error('Expected a simulation error result');
+    expect(result.error).toContain('Error(Storage, MissingValue)');
+    expect(result.latestLedger).toBeGreaterThan(0);
     expect(upstreamContacts).toBe(0);
   });
 });
