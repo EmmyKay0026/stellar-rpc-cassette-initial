@@ -33,7 +33,7 @@
 - [x] `simulateTransaction` real fixture
 - [x] Method-aware normalization framework
 - [x] XDR inspection/normalization helpers
-- [ ] `getEvents` pagination replay
+- [x] `getEvents` pagination replay
 
 ## M5 — Developer-ready v0.1
 
@@ -46,3 +46,4 @@
 ## M6 — Maintainer-ready project
 
 Create contributor issues only after the core workflow is proven against real Stellar calls. Good follow-on issues include normalizers, pagination, migrations, diffing, adapters, validation, sanitization, compatibility testing, and performance work.
+

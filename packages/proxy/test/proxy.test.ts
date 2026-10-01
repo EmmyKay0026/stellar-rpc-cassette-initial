@@ -380,4 +380,43 @@ describe('record and replay proxy', () => {
     expect(result.latestLedger).toBeGreaterThan(0);
     expect(upstreamContacts).toBe(0);
   });
+  it('replays paginated getEvents pages through the Stellar SDK without upstream access', async () => {
+    let upstreamContacts = 0;
+    const forbiddenUpstream = createServer((_req, res) => {
+      upstreamContacts += 1;
+      res.statusCode = 500;
+      res.end('Replay must never contact upstream');
+    });
+    const upstreamPort = await listen(forbiddenUpstream);
+    const cassettePath = fileURLToPath(
+      new URL('../../../fixtures/events/testnet-pagination.json', import.meta.url),
+    );
+    const replayServer = await startProxy({
+      mode: 'replay',
+      cassettePath,
+      upstream: `http://127.0.0.1:${upstreamPort}`,
+      port: 0,
+    });
+    servers.push(replayServer);
+    const address = replayServer.address();
+    if (!address || typeof address === 'string') throw new Error('Expected TCP address');
+
+    const client = new rpc.Server(`http://127.0.0.1:${address.port}`, { allowHttp: true });
+    const firstPage = await client.getEvents({
+      startLedger: 4952929,
+      filters: [{ type: 'contract' }],
+      limit: 100,
+    });
+    expect(firstPage.events).toHaveLength(100);
+    expect(firstPage.cursor).toBe('0021272672369430528-0000000001');
+
+    const secondPage = await client.getEvents({
+      cursor: firstPage.cursor,
+      filters: [{ type: 'contract' }],
+      limit: 100,
+    });
+    expect(secondPage.events).toHaveLength(0);
+    expect(secondPage.cursor).toBe('');
+    expect(upstreamContacts).toBe(0);
+  });
 });
