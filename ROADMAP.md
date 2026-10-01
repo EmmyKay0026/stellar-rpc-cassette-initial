@@ -32,7 +32,7 @@
 - [x] `getLedgerEntries` real fixture
 - [x] `simulateTransaction` real fixture
 - [x] Method-aware normalization framework
-- [ ] XDR inspection/normalization helpers
+- [x] XDR inspection/normalization helpers
 - [ ] `getEvents` pagination replay
 
 ## M5 — Developer-ready v0.1
