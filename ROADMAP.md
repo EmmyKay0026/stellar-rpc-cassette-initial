@@ -24,7 +24,7 @@
 - [x] Restore incoming request ID in response
 - [x] Sequential consumption for duplicate requests
 - [x] Test sequential consumption for duplicate requests
-- [ ] Explicit replay matching modes
+- [x] Explicit replay matching modes
 
 ## M4 — Stellar-aware behavior
 

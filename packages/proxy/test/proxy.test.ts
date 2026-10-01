@@ -1,6 +1,7 @@
 import { createServer } from 'node:http';
 import { fileURLToPath } from 'node:url';
 import { rpc } from '@stellar/stellar-sdk';
+import { appendInteraction, createCassette, saveCassette } from '@stellar-rpc-cassette/core';
 import { mkdtemp, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -249,5 +250,65 @@ describe('record and replay proxy', () => {
     expect(cassetteText).not.toContain('super-secret-api-key');
     expect(cassetteText.toLowerCase()).not.toContain('authorization');
     expect(cassetteText.toLowerCase()).not.toContain('x-api-key');
+  });
+  it('supports sequential and strict replay matching modes', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'stellar-cassette-match-modes-'));
+    const cassettePath = join(dir, 'match-modes.json');
+    const firstRequest = { jsonrpc: '2.0' as const, id: 1, method: 'getLatestLedger', params: {} };
+    const secondRequest = {
+      jsonrpc: '2.0' as const,
+      id: 2,
+      method: 'getLedgerEntries',
+      params: { keys: [] },
+    };
+    const cassette = appendInteraction(
+      appendInteraction(createCassette(), {
+        request: firstRequest,
+        response: { jsonrpc: '2.0', id: 1, result: { marker: 'first' } },
+      }),
+      {
+        request: secondRequest,
+        response: { jsonrpc: '2.0', id: 2, result: { marker: 'second' } },
+      },
+    );
+    await saveCassette(cassettePath, cassette);
+
+    const strictServer = await startProxy({
+      mode: 'replay',
+      cassettePath,
+      replayMatchMode: 'strict',
+      port: 0,
+    });
+    servers.push(strictServer);
+    const strictAddress = strictServer.address();
+    if (!strictAddress || typeof strictAddress === 'string')
+      throw new Error('Expected TCP address');
+
+    const strictMiss = await fetch(`http://127.0.0.1:${strictAddress.port}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ ...secondRequest, id: 22 }),
+    });
+    expect(strictMiss.status).toBe(409);
+
+    const strictFirst = await fetch(`http://127.0.0.1:${strictAddress.port}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ ...firstRequest, id: 11 }),
+    }).then((response) => response.json());
+    expect(strictFirst).toMatchObject({ id: 11, result: { marker: 'first' } });
+
+    const sequentialServer = await startProxy({ mode: 'replay', cassettePath, port: 0 });
+    servers.push(sequentialServer);
+    const sequentialAddress = sequentialServer.address();
+    if (!sequentialAddress || typeof sequentialAddress === 'string')
+      throw new Error('Expected TCP address');
+
+    const sequentialSecond = await fetch(`http://127.0.0.1:${sequentialAddress.port}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ ...secondRequest, id: 22 }),
+    }).then((response) => response.json());
+    expect(sequentialSecond).toMatchObject({ id: 22, result: { marker: 'second' } });
   });
 });

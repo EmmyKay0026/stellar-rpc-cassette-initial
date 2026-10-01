@@ -24,6 +24,7 @@ program
   .requiredOption('--cassette <path>', 'Cassette JSON file')
   .option('--host <host>', 'Local host', '127.0.0.1')
   .option('--port <port>', 'Local port', '6969')
+  .option('--match-mode <mode>', 'Replay matching mode: sequential or strict', 'sequential')
   .action(runReplay);
 
 program.command('inspect <cassette>').action(runInspect);

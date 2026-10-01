@@ -1,5 +1,5 @@
 import { createServer, type IncomingHttpHeaders, type Server } from 'node:http';
-import { CassetteMissError } from '@stellar-rpc-cassette/core';
+import { CassetteMissError, type ReplayMatchMode } from '@stellar-rpc-cassette/core';
 import { readJsonBody, sendJson } from './http.js';
 import { recordInteraction } from './record.js';
 import { createReplaySession } from './replay.js';
@@ -29,12 +29,13 @@ export interface ProxyOptions {
   host?: string;
   port?: number;
   forwardHeaders?: Record<string, string>;
+  replayMatchMode?: ReplayMatchMode;
 }
 
 export async function startProxy(options: ProxyOptions): Promise<Server> {
   const host = options.host ?? '127.0.0.1';
   const port = options.port ?? 6969;
-  const replay = createReplaySession();
+  const replay = createReplaySession(options.replayMatchMode);
 
   if (options.mode === 'record' && !options.upstream) {
     throw new Error('Record mode requires an upstream Stellar RPC URL.');
