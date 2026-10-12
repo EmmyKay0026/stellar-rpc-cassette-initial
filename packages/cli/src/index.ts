@@ -3,6 +3,7 @@ import { Command } from 'commander';
 import { runInspect } from './commands/inspect.js';
 import { runRecord } from './commands/record.js';
 import { runReplay } from './commands/replay.js';
+import { runValidate } from './commands/validate.js';
 
 const program = new Command();
 
@@ -29,5 +30,10 @@ program
   .action(runReplay);
 
 program.command('inspect <cassette>').action(runInspect);
+
+program
+  .command('validate <cassette>')
+  .description('Validate cassette structure without starting a proxy or contacting the network.')
+  .action(runValidate);
 
 await program.parseAsync(process.argv);
