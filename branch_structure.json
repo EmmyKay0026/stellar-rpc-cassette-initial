@@ -1,0 +1,21 @@
+{
+  "default_branch": "main",
+  "branches": [
+    "feat/cassette-migration",
+    "feat/validate-command",
+    "main",
+    "origin"
+  ],
+  "parent": {
+    "feat/cassette-migration": "main",
+    "feat/validate-command": "main",
+    "main": null,
+    "origin": "main"
+  },
+  "order": [
+    "main",
+    "feat/cassette-migration",
+    "feat/validate-command",
+    "origin"
+  ]
+}
